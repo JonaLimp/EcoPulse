@@ -1,0 +1,11 @@
+{
+    "database": {
+        "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
+      },
+    "pipeline_settings": {
+        "subreddits": ["environment", "climate", "sustainability"],
+        "keywords": ["climate change", "carbon footprint", "renewable energy"],
+        "post_limit": 100,
+        "log_file": "pipeline.log"
+      }
+    }
