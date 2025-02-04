@@ -1,6 +1,6 @@
 from .logger import setup_logger
 class PipelineManager:
-    def __init__(self, fetcher: 'BaseFetcher', cleaner: 'BaseDataCleaner', db_manager: 'BaseDBManager') -> None:
+    def __init__(self, fetcher: 'DataFetcher', cleaner: 'DataCleaner', enricher: 'DataEnricher', filter: 'DataFilter' ,db_manager: 'BaseDBManager') -> None:
         """
         Initializes a PipelineManager object with the given fetcher, cleaner and db_manager instances.
 
@@ -9,12 +9,14 @@ class PipelineManager:
         - cleaner (BaseDataCleaner): The cleaner object that will be used to clean the fetched data.
         - db_manager (BaseDBManager): The db_manager object that will be used to store the cleaned data.
         """
-        self.logger = setup_logger("EcoPulse")
-        self.fetcher = fetcher
-        self.cleaner = cleaner
-        self.db_manager = db_manager
+        self._logger = setup_logger("EcoPulse")
+        self._fetcher = fetcher
+        self._enricher = enricher
+        self._filter = filter
+        self._cleaner = cleaner
+        self._db_manager = db_manager
 
-    def run(self, categories: list[dict[str]], limit: int = 100, run_posts: bool = True, run_comments: bool = True) -> None:
+    def run(self) -> None:
         """
         Runs the pipeline to fetch, clean and store data from Reddit.
 
@@ -28,31 +30,21 @@ class PipelineManager:
         Returns:
             None
         """
-        if run_posts == True:
-            self.logger.info("Fetching post data...")
-            raw_data = self.fetcher.fetch_reddit_posts(categories, limit)
+        self._logger.info("Fetching data...")
+        raw_data = self._fetcher.run()
+        self._logger.info("Cleaning data...")
+        cleaned_data = self._cleaner.run(raw_data)
+        self._logger.info("Enriching data..." )
+        enriched_data = self._enricher.run(cleaned_data)
+        self._logger.info("Filtering data...")
+        filtered_data = self._filter.run(enriched_data)
+        self._logger.info("Storing data...")
+        try:
+            self._db_manager.store_posts(filtered_data)
+        except Exception as e:
+            self._logger.error(f"Error occurred while storing post data: {str(e)}")
 
-            self.logger.info("Cleaning post data...")
-            cleaned_data = self.cleaner.clean_data(raw_data)
 
-            self.logger.info("Storing post data...")
-            try:
-                self.db_manager.store_posts(cleaned_data)
-            except Exception as e:
-                self.logger.error(f"Error occurred while storing post data: {str(e)}")
-
-        if run_comments == True:
-            self.logger.info("Fetching comment data...")
-            raw_data = self.fetcher.fetch_reddit_comments(categories, limit)
-
-            self.logger.info("Cleaning comment data...")
-            cleaned_data = self.cleaner.clean_data(raw_data)
-
-            self.logger.info("Storing comment data...")
-            try:
-                self.db_manager.store_comments(cleaned_data)
-            except Exception as e:
-                self.logger.error(f"Error occurred while storing comment data: {str(e)}")
-
-        self.logger.info("Pipeline executed successfully!")
+        self._logger.info("Pipeline executed!")
+        return filtered_data
 

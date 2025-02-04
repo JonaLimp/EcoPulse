@@ -1,10 +1,14 @@
 import os
+import json
+
 from dotenv import load_dotenv
-from .reddit_fetcher import RedditFetcher
+
+from .reddit_fetcher import RedditPostFetcher, RedditCommentFetcher
 from .database_manager import DatabaseManager
 from .pipeline_manager import PipelineManager
-from .data_cleaner import DataCleaner
-import json
+from .data_cleaner import RedditPostCleaner, RedditCommentCleaner
+from .data_enricher import RedditCommentEnricher, RedditPostEnricher
+from .data_filter import DataFilter
 
 load_dotenv()
 
@@ -28,14 +32,24 @@ POST_LIMIT = config["pipeline_settings"]["post_limit"]
 
 def main():
     
-    fetcher = RedditFetcher(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT)
-    cleaner = DataCleaner()
+    post_fetcher = RedditPostFetcher(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT, CATEGORIES, POST_LIMIT)
+    
+    post_cleaner = RedditPostCleaner()
+    post_enricher = RedditPostEnricher ()
+    filter = DataFilter()
     db_manager = DatabaseManager(DB_URL, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME)
 
-    pipeline = PipelineManager(fetcher, cleaner, db_manager)
-    pipeline.run(categories=CATEGORIES, limit=POST_LIMIT,
-                 run_comments=False
-                 )
+    post_pipeline = PipelineManager(fetcher=post_fetcher, cleaner=post_cleaner, enricher=post_enricher, filter=filter, db_manager=db_manager)
+    post_filtered_data = post_pipeline.run()
+    
+    comment_fetcher = RedditCommentFetcher(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT, POST_LIMIT, post_filtered_data['id'])
+    comment_cleaner = RedditCommentCleaner()
+    comment_enricher = RedditCommentEnricher()
+    comment_pipeline = PipelineManager(fetcher=comment_fetcher, cleaner=comment_cleaner, enricher=comment_enricher, filter=filter, db_manager=db_manager )
+    comment_pipeline.run()
+    
+    
+    
         
 if __name__ == "__main__":
     main()

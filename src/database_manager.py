@@ -1,10 +1,7 @@
 from sqlalchemy import create_engine
 import mysql
-from .logger import setup_logger
-
 class DatabaseManager:
     def __init__(self, db_url, host, user, password, database):
-        self.logger = setup_logger("EcoPulse")
         self.engine = create_engine(
             db_url
             )
@@ -20,8 +17,8 @@ class DatabaseManager:
     def store_posts(self, posts):
         """Insert Reddit posts into the database."""
         query = """
-        INSERT INTO posts (id, title, author, subreddit, content, created_datetime, score, num_comments, url, category, matched_keywords)
-        VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO posts (id, title, author, subreddit, content, created_datetime, score, num_comments, url, category, matched_keywords, sentiment_score)
+        VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE score = VALUES(score), num_comments = VALUES(num_comments);
         """
         # data = [(post["id"], post["title"], post["author"], post["subreddit"], post["created_datetime"], post["score"], post["num_comments"], post["url"]) for post in posts]
@@ -30,7 +27,7 @@ class DatabaseManager:
     
         data = [(post["id"], post["title"], post["author"], post["subreddit"],
             post['content'], post["created_datetime"], post["score"], post["num_comments"], 
-            post["url"], post.get("category", ""), post.get("matched_keywords", "")) for post in posts_list]
+            post["url"], post.get("category", ""), post.get("matched_keywords", ""), post.get("sentiment_score", "")) for post in posts_list]
     
         self.cursor.executemany(query, data)
         self.connection.commit()

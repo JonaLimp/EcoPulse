@@ -1,9 +1,9 @@
-from datetime import datetime
 import praw
-from .logger import setup_logger
+from .data_processor import DataProcessor
 
-class RedditFetcher:
-    def __init__(self, client_id: str, client_secret: str, user_agent: str) -> None:
+
+class RedditDataFetcher(DataProcessor):
+    def __init__(self, client_id: str, client_secret: str, user_agent: str, limit: int) -> None:
         """
         Initializes the Fetcher object.
 
@@ -15,35 +15,77 @@ class RedditFetcher:
         Returns:
         - None
         """
-        self.logger = setup_logger('EcoPulse')
-        self.reddit = praw.Reddit(
+        super().__init__()
+        
+        self._reddit = praw.Reddit(
         client_id=client_id,
         client_secret=client_secret,
         user_agent=user_agent
 )
+          
+        self._limit = limit
+        
+class RedditCommentFetcher(RedditDataFetcher):
+    def __init__(self, client_id, client_secret, user_agent, limit,  post_ids: list[str]):
+        super().__init__(client_id, client_secret, user_agent, limit)
+        self._post_ids = post_ids
     
+    def run(self) -> list[dict[str, any]]:
+        """
+        Fetches comments for a list of Reddit posts.
 
-    def fetch_reddit_posts(self, categories: list[dict[str, list[str]]], limit: int = 100) -> list[dict[str, any]]:
+        Args:
+            post_ids (list[str]): List of post IDs.
+            limit (int): Number of comments to fetch per post.
+
+        Returns:
+            list[dict[str, any]]: List of dictionaries containing comment data.
+        """
+        comments = []
+        for post_id in self._post_ids:
+            post = self._reddit.submission(id=post_id)
+            post.comments.replace_more(limit=0)
+            for comment in post.comments.list():
+                comments.append(
+                    {
+                        "id": comment.id,
+                        "post_id": post_id,
+                        "author": comment.author.name if comment.author else None,
+                        "subreddit": post.subreddit.display_name,
+                        "body": comment.body,
+                        "score": comment.score,
+                        "created_utc": comment.created_utc,
+                    }
+                )
+        return comments
+
+
+class RedditPostFetcher(RedditDataFetcher):
+    def __init__(self, client_id: str, client_secret: str, user_agent: str, categories, limit):
+        super().__init__(client_id, client_secret, user_agent, limit)
+        self._categories = categories
+    
+    def run(self) -> list[dict[str, any]]:
         """
         Fetches Reddit posts based on keywords.
 
-        Parameters:
-        - categories (list[dict[str, list[str]]]): List of categories, each containing subreddits and keywords.
-        - limit (int): Number of posts to fetch per keyword.
+        Args:
+            categories (list[dict[str, list[str]]]): List of categories, each containing subreddits and keywords.
+            limit (int): Number of posts to fetch per keyword.
 
         Returns:
-        - list[dict[str, any]]: List of dictionaries containing post data.
+            list[dict[str, any]]: List of dictionaries containing post data.
         """
         posts = []
-        for category in categories:
-            subreddits = categories[category]['subreddits']
+        for category in self._categories:
+            subreddits = self._categories[category]['subreddits']
             for subreddit in subreddits:
                 self.logger.info(f"Searching in subreddit: {subreddit}")
-                keywords = categories[category]['keywords']
+                keywords = self._categories[category]['keywords']
                 for keyword in keywords:
                     self.logger.info(f"Searching for keyword: {keyword}")
                     try:
-                        for submission in self.reddit.subreddit(subreddit).search(keyword, sort='new', limit=limit):
+                        for submission in self._reddit.subreddit(subreddit).search(keyword, sort='new', limit=self._limit):
                             posts.append({
                                 "id": submission.id,
                                 "title": submission.title,
@@ -54,54 +96,11 @@ class RedditFetcher:
                                 "score": submission.score,
                                 "url": submission.url,
                                 "num_comments": submission.num_comments,
-                                "created_datetime": self.format_datetime(submission.created_utc),
                                 "category": category,
-                                "keyword": keyword
+                                "keyword": keyword,
                             })
                     except Exception as e:
                         self.logger.error(f"Error fetching posts: {e}")
 
         return posts
 
-
-    def fetch_reddit_comments(self, post_ids: list[str], limit: int = 100) -> list[dict]:
-        """
-        Fetches comments for a list of Reddit posts.
-
-        Parameters:
-        - post_ids (list[str]): List of post IDs.
-        - limit (int): Number of comments to fetch per post.
-
-        Returns:
-        - list[dict]: List of dictionaries containing comment data.
-        """
-        comments = []
-        for post_id in post_ids:
-            submission: praw.models.Submission = self.reddit.submission(id=post_id)
-            submission.comments.replace_more(limit=0)  
-            for comment in submission.comments.list():
-                comments.append({
-                    "id": comment.id,
-                    "post_id": post_id,
-                    "author": comment.author.name if comment.author else None,
-                    "subreddit": submission.subreddit.display_name,
-                    "body": comment.body,
-                    "score": comment.score,
-                    "created_utc": comment.created_utc,
-                    "created_datetime": self.format_datetime(submission.created_utc),
-                    "seacrch_category" : "subreddit",
-                    "matched_keywords" : "keyword"
-                })
-        return comments
-
-    def format_datetime(self, utc_timestamp: int) -> str:
-        """
-        Converts a Unix timestamp (int) to a human-readable datetime string (str).
-
-        Parameters:
-        - utc_timestamp (int): Unix timestamp
-
-        Returns:
-        - str: Human-readable datetime string in the format %Y-%m-%d %H:%M:%S
-        """
-        return datetime.utcfromtimestamp(utc_timestamp).strftime('%Y-%m-%d %H:%M:%S')
