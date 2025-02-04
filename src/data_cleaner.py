@@ -1,6 +1,9 @@
 import pandas as pd
+from .logger import setup_logger
 
 class DataCleaner:
+    def __init__(self):
+             self.logger = setup_logger('EcoPulse')
     @staticmethod
     def clean_data(raw_data: list[dict]) -> pd.DataFrame:
         """

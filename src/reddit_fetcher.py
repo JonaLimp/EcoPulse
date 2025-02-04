@@ -15,7 +15,7 @@ class RedditFetcher:
         Returns:
         - None
         """
-        self.logger = setup_logger()
+        self.logger = setup_logger('EcoPulse')
         self.reddit = praw.Reddit(
         client_id=client_id,
         client_secret=client_secret,
@@ -23,37 +23,43 @@ class RedditFetcher:
 )
     
 
-    def fetch_reddit_posts(self, keywords: list[str], subreddits: list[str] = "all", limit: int = 100) -> list[dict]:
+    def fetch_reddit_posts(self, categories: list[dict[str, list[str]]], limit: int = 100) -> list[dict[str, any]]:
         """
         Fetches Reddit posts based on keywords.
 
         Parameters:
-        - keywords (list[str]): List of keywords to search for.
-        - subreddit (str): Subreddit to search in ("all" for all subreddits).
+        - categories (list[dict[str, list[str]]]): List of categories, each containing subreddits and keywords.
         - limit (int): Number of posts to fetch per keyword.
 
         Returns:
-        - list[dict]: List of dictionaries containing post data.
+        - list[dict[str, any]]: List of dictionaries containing post data.
         """
         posts = []
-        for subreddit in subreddits:
-            for keyword in keywords:
-                self.logger.info(f"Searching for keyword: {keyword}")
-                try:
-                    for submission in self.reddit.subreddit(subreddit).search(keyword, sort='new', limit=limit):
-                        posts.append({
-                            "id": submission.id,
-                            "title": submission.title,
-                            "author": submission.author.name if submission.author else None,
-                            "subreddit": submission.subreddit.display_name,
-                            "created_utc": submission.created_utc,
-                            "score": submission.score,
-                            "url": submission.url,
-                            "num_comments": submission.num_comments,
-                            "created_datetime": self.format_datetime(submission.created_utc),
-                        })
-                except Exception as e:
-                    self.logger.error(f"Error fetching posts: {e}") 
+        for category in categories:
+            subreddits = categories[category]['subreddits']
+            for subreddit in subreddits:
+                self.logger.info(f"Searching in subreddit: {subreddit}")
+                keywords = categories[category]['keywords']
+                for keyword in keywords:
+                    self.logger.info(f"Searching for keyword: {keyword}")
+                    try:
+                        for submission in self.reddit.subreddit(subreddit).search(keyword, sort='new', limit=limit):
+                            posts.append({
+                                "id": submission.id,
+                                "title": submission.title,
+                                "author": submission.author.name if submission.author else None,
+                                "subreddit": submission.subreddit.display_name,
+                                "content": submission.selftext,
+                                "created_utc": submission.created_utc,
+                                "score": submission.score,
+                                "url": submission.url,
+                                "num_comments": submission.num_comments,
+                                "created_datetime": self.format_datetime(submission.created_utc),
+                                "category": category,
+                                "keyword": keyword
+                            })
+                    except Exception as e:
+                        self.logger.error(f"Error fetching posts: {e}")
 
         return posts
 
@@ -83,6 +89,8 @@ class RedditFetcher:
                     "score": comment.score,
                     "created_utc": comment.created_utc,
                     "created_datetime": self.format_datetime(submission.created_utc),
+                    "seacrch_category" : "subreddit",
+                    "matched_keywords" : "keyword"
                 })
         return comments
 
