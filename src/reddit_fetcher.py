@@ -93,7 +93,7 @@ class RedditPostFetcher(RedditDataFetcher):
                     self.logger.info(f"Searching for keyword: {keyword}")
                     try:
                         for submission in self._reddit.subreddit(subreddit).search(
-                            keyword, sort="new", time_filter="day,", limit=self._limit
+                            keyword, sort="new", time_filter="day", limit=self._limit
                         ):
                             posts.append(
                                 {

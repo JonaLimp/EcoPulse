@@ -56,9 +56,10 @@ class DataFilter(DataProcessor):
         pass
 
     def _strong_opinion(self, data: DataFrame) -> bool:
-        data["sentiment_score"] >= self.sentiment_threshold or data[
-            "sentiment_score"
-        ] <= -1 * self.sentiment_threshold
+        return (
+            data["sentiment_score"] >= self.sentiment_threshold
+            or data["sentiment_score"] <= -1 * self.sentiment_threshold
+        )
 
     def run(self, df: DataFrame) -> DataFrame:
         df = df[df.apply(lambda row: self._is_valuable(row), axis=1)]

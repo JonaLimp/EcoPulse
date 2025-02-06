@@ -8,7 +8,7 @@ from .database_manager import DatabaseManager
 from .pipeline_manager import PipelineManager
 from .data_cleaner import RedditPostCleaner, RedditCommentCleaner
 from .data_enricher import RedditCommentEnricher, RedditPostEnricher
-from .data_filter import DataFilter
+from .data_filter import RedditCommentFilter, RedditPostFilter
 
 load_dotenv()
 
@@ -43,7 +43,7 @@ def main():
 
     post_cleaner = RedditPostCleaner()
     post_enricher = RedditPostEnricher()
-    filter = DataFilter()
+    post_filter = RedditPostFilter()
     db_manager = DatabaseManager(
         DB_URL, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
     )
@@ -52,7 +52,7 @@ def main():
         fetcher=post_fetcher,
         cleaner=post_cleaner,
         enricher=post_enricher,
-        filter=filter,
+        filter=post_filter,
         db_manager=db_manager,
     )
     post_filtered_data = post_pipeline.run()
@@ -66,11 +66,12 @@ def main():
     )
     comment_cleaner = RedditCommentCleaner()
     comment_enricher = RedditCommentEnricher()
+    comment_filter = RedditCommentFilter()
     comment_pipeline = PipelineManager(
         fetcher=comment_fetcher,
         cleaner=comment_cleaner,
         enricher=comment_enricher,
-        filter=filter,
+        filter=comment_filter,
         db_manager=db_manager,
     )
     comment_pipeline.run()
