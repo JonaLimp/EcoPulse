@@ -21,7 +21,12 @@ class DataEnricher(DataProcessor):
         """
         return datetime.utcfromtimestamp(utc_timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
-    def get_sentiment_score(self, title: str) -> float | None:
+
+class RedditCommentEnricher(DataEnricher):
+    def __init__(self):
+        super().__init__()
+
+    def get_sentiment_score(self, body: str) -> float | None:
         """
         Calculates the sentiment score for a given title string.
 
@@ -35,34 +40,9 @@ class DataEnricher(DataProcessor):
         Returns:
         - float | None: Sentiment score, or None if input is invalid.
         """
-        if not title or title == "":
+        if not body or body == "":
             return None
-        return TextBlob(title).sentiment.polarity
-
-    def run(self, data: DataFrame) -> DataFrame:
-        """
-        Enriches a Pandas DataFrame containing Reddit post data.
-
-        Adds two new columns to the DataFrame:
-        - `created_datetime`: A human-readable datetime string in the
-        format %Y-%m-%d %H:%M:%S
-        - `sentiment_score`: A float from -1.0 (very negative sentiment)
-        to 1.0 (very positive sentiment)
-
-        Parameters:
-        - data (pd.DataFrame): A Pandas DataFrame containing Reddit post data.
-
-        Returns:
-        - pd.DataFrame: A Pandas DataFrame with the enriched columns.
-        """
-        data["created_datetime"] = data["created_utc"].apply(self._format_datetime)
-        data["sentiment_score"] = data["title"].apply(self.get_sentiment_score)
-        return data
-
-
-class RedditCommentEnricher(DataEnricher):
-    def __init__(self):
-        super().__init__()
+        return TextBlob(body).sentiment.polarity
 
     def run(self, data: DataFrame) -> DataFrame:
         """
@@ -108,3 +88,21 @@ class RedditPostEnricher(DataEnricher):
         data["created_datetime"] = data["created_utc"].apply(self._format_datetime)
         data["sentiment_score"] = data["title"].apply(self.get_sentiment_score)
         return data
+
+    def get_sentiment_score(self, title: str) -> float | None:
+        """
+        Calculates the sentiment score for a given title string.
+
+        Returns a float from -1.0 (very negative sentiment) to 1.0
+        (very positive sentiment),
+        or None if the input is empty or None.
+
+        Parameters:
+        - title (str): Title string to analyze.
+
+        Returns:
+        - float | None: Sentiment score, or None if input is invalid.
+        """
+        if not title or title == "":
+            return None
+        return TextBlob(title).sentiment.polarity
