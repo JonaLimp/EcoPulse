@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 
 from .reddit_fetcher import RedditPostFetcher, RedditCommentFetcher
-from .database_manager import DatabaseManager
+from .database_manager import CommentDataBaseManager, PostDataBaseManager
 from .pipeline_manager import PipelineManager
 from .data_cleaner import RedditPostCleaner, RedditCommentCleaner
 from .data_enricher import RedditCommentEnricher, RedditPostEnricher
@@ -44,7 +44,7 @@ def main():
     post_cleaner = RedditPostCleaner()
     post_enricher = RedditPostEnricher()
     post_filter = RedditPostFilter()
-    db_manager = DatabaseManager(
+    post_db_manager = PostDataBaseManager(
         DB_URL, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
     )
 
@@ -53,7 +53,7 @@ def main():
         cleaner=post_cleaner,
         enricher=post_enricher,
         filter=post_filter,
-        db_manager=db_manager,
+        db_manager=post_db_manager,
     )
     post_filtered_data = post_pipeline.run()
 
@@ -67,12 +67,15 @@ def main():
     comment_cleaner = RedditCommentCleaner()
     comment_enricher = RedditCommentEnricher()
     comment_filter = RedditCommentFilter()
+    comment_db_mananger = CommentDataBaseManager(
+        DB_URL, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
+    )
     comment_pipeline = PipelineManager(
         fetcher=comment_fetcher,
         cleaner=comment_cleaner,
         enricher=comment_enricher,
         filter=comment_filter,
-        db_manager=db_manager,
+        db_manager=comment_db_mananger,
     )
     comment_pipeline.run()
 
