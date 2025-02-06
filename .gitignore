@@ -2,3 +2,4 @@
 .env
 .vscode
 data
+pipeline_run.sh
