@@ -30,6 +30,7 @@ DB_URL = f"""mysql+mysqlconnector://{DATABASE_USER}
 
 CATEGORIES = config["pipeline_settings"]["categories"]
 POST_LIMIT = config["pipeline_settings"]["post_limit"]
+MORE_COMMENT_LIMIT = config["pipeline_settings"]["more_comment_limit"]
 
 
 def main():
@@ -61,7 +62,7 @@ def main():
         REDDIT_CLIENT_ID,
         REDDIT_CLIENT_SECRET,
         REDDIT_USER_AGENT,
-        POST_LIMIT,
+        MORE_COMMENT_LIMIT,
         post_filtered_data["id"],
     )
     comment_cleaner = RedditCommentCleaner()

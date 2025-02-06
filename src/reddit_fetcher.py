@@ -4,9 +4,7 @@ from typing import Any
 
 
 class RedditDataFetcher(DataProcessor):
-    def __init__(
-        self, client_id: str, client_secret: str, user_agent: str, limit: int
-    ) -> None:
+    def __init__(self, client_id: str, client_secret: str, user_agent: str) -> None:
         """
         Initializes the Fetcher object.
 
@@ -24,15 +22,19 @@ class RedditDataFetcher(DataProcessor):
             client_id=client_id, client_secret=client_secret, user_agent=user_agent
         )
 
-        self._limit = limit
-
 
 class RedditCommentFetcher(RedditDataFetcher):
     def __init__(
-        self, client_id, client_secret, user_agent, limit, post_ids: list[str]
+        self,
+        client_id,
+        client_secret,
+        user_agent,
+        more_comment_limit,
+        post_ids: list[str],
     ):
-        super().__init__(client_id, client_secret, user_agent, limit)
+        super().__init__(client_id, client_secret, user_agent)
         self._post_ids = post_ids
+        self._more_comment_limit = more_comment_limit
 
     def run(self) -> list[dict[str]]:
         """
@@ -57,7 +59,7 @@ class RedditCommentFetcher(RedditDataFetcher):
                 )
 
             post = self._reddit.submission(id=post_id)
-            post.comments.replace_more(limit=0)
+            post.comments.replace_more(limit=self._more_comment_limit)
             for comment in post.comments.list():
                 comments.append(
                     {
@@ -75,10 +77,16 @@ class RedditCommentFetcher(RedditDataFetcher):
 
 class RedditPostFetcher(RedditDataFetcher):
     def __init__(
-        self, client_id: str, client_secret: str, user_agent: str, categories, limit
+        self,
+        client_id: str,
+        client_secret: str,
+        user_agent: str,
+        categories,
+        post_limit,
     ):
-        super().__init__(client_id, client_secret, user_agent, limit)
+        super().__init__(client_id, client_secret, user_agent)
         self._categories = categories
+        self._post_limit = post_limit
 
     def run(self) -> Any:
         """
@@ -104,7 +112,10 @@ class RedditPostFetcher(RedditDataFetcher):
                     )
                     try:
                         for submission in self._reddit.subreddit(subreddit).search(
-                            keyword, sort="new", time_filter="day", limit=self._limit
+                            keyword,
+                            sort="new",
+                            time_filter="day",
+                            limit=self._post_limit,
                         ):
                             posts.append(
                                 {
