@@ -1,19 +1,24 @@
 import unittest
 from unittest.mock import patch, MagicMock
-import pandas as pd
 
-from src.data_filter import RedditPostFilter
-from src.reddit_fetcher import RedditCommentFetcher, RedditPostFetcher 
+from src.reddit_fetcher import RedditCommentFetcher, RedditPostFetcher
 
 
 class TestRedditPostFetcher(unittest.TestCase):
     """Test class for RedditFetcher"""
 
-    @patch("src.reddit_fetcher.praw.Reddit")  
+    @patch("src.reddit_fetcher.praw.Reddit")
     def setUp(self, mock_praw):
         """Set up a RedditFetcher instance with a fully mocked Reddit API."""
-        self.mock_reddit = mock_praw.return_value  
-        self.fetcher = RedditPostFetcher('client_id', 'client_secret', 'user_agent', {'category1': {'subreddits': ['subreddit1'], 'keywords': ['keyword1']}}, 10)
+        self.mock_reddit = mock_praw.return_value
+        self.fetcher = RedditPostFetcher(
+            "client_id",
+            "client_secret",
+            "user_agent",
+            {"category1": {"subreddits": ["subreddit1"], "keywords": ["keyword1"]}},
+            10,
+        )
+
     def test_fetch_reddit_posts_valid_input(self):
         """Test fetching Reddit posts with a patched API."""
 
@@ -22,17 +27,12 @@ class TestRedditPostFetcher(unittest.TestCase):
 
         mock_post_1 = MagicMock(id="post_1", title="Test Post 1")
         mock_post_1.author = MagicMock()
-        mock_post_1.author.name = "User1" 
+        mock_post_1.author.name = "User1"
         mock_post_2 = MagicMock(id="post_2", title="Test Post 2")
         mock_post_2.author = MagicMock()
-        mock_post_2.author.name = "User2"  
-        
+        mock_post_2.author.name = "User2"
+
         mock_subreddit.search.return_value = iter([mock_post_1, mock_post_2])
-
-
-        keywords = ["climate"]
-        subreddits = ["environment"]
-        limit = 100
 
         result = self.fetcher.run()
 
@@ -44,11 +44,14 @@ class TestRedditPostFetcher(unittest.TestCase):
 class TestRedditCommentFetcher(unittest.TestCase):
     """Test class for RedditFetcher"""
 
-    @patch("src.reddit_fetcher.praw.Reddit")  
+    @patch("src.reddit_fetcher.praw.Reddit")
     def setUp(self, mock_praw):
         """Set up a RedditFetcher instance with a fully mocked Reddit API."""
-        self.mock_reddit = mock_praw.return_value  
-        self.fetcher = RedditCommentFetcher('client_id', 'client_secret', 'user_agent', 10, ["post_1", "post_2"])
+        self.mock_reddit = mock_praw.return_value
+        self.fetcher = RedditCommentFetcher(
+            "client_id", "client_secret", "user_agent", 10, ["post_1", "post_2"]
+        )
+
     def test_fetch_reddit_posts_valid_input(self):
         """Test fetching Reddit posts with a patched API."""
 
@@ -59,8 +62,8 @@ class TestRedditCommentFetcher(unittest.TestCase):
         mock_post_1.body = "Test Comment 1"
         mock_post_2 = MagicMock(id="post_2", title="Test Comment 2")
         mock_post_2.author = MagicMock()
-        mock_post_2.body = "Test Comment 2" 
-        
+        mock_post_2.body = "Test Comment 2"
+
         mock_subreddit.comments.list.return_value = [mock_post_1, mock_post_2]
 
         result = self.fetcher.run()

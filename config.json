@@ -1,11 +1,15 @@
 {
-    "database": {
-        "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
-      },
-    "pipeline_settings": {
-        "subreddits": ["environment", "climate", "sustainability"],
-        "keywords": ["climate change", "carbon footprint", "renewable energy"],
-        "post_limit": 100,
-        "log_file": "pipeline.log"
+  "database": {
+    "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
+  },
+  "pipeline_settings": {
+    "categories": {
+      "General": {
+        "subreddits": ["environment"],
+        "keywords": ["climate change"]
       }
-    }
+    },
+    "post_limit": 10,
+    "log_file": "pipeline.log"
+  }
+}

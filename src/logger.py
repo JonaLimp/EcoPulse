@@ -1,11 +1,12 @@
 import logging
 
+
 def setup_logger(log_file="ecopulse.log"):
     """
     Set up a logger to write logs to both console and a file.
     """
     logger = logging.getLogger("EcoPulse")
-    
+
     if not logger.hasHandlers():
         logger.setLevel(logging.INFO)
 
