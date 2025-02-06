@@ -50,17 +50,13 @@ class PipelineManager:
         Returns:
             None
         """
-        self._logger.info("Fetching data...")
         raw_data = self._fetcher.run()
-        self._logger.info("Cleaning data...")
         cleaned_data = self._cleaner.run(raw_data)
-        self._logger.info("Enriching data...")
         enriched_data = self._enricher.run(cleaned_data)
-        self._logger.info("Filtering data...")
         filtered_data = self._filter.run(enriched_data)
-        self._logger.info("Storing data...")
+
         try:
-            self._db_manager.store_posts(filtered_data)
+            self._db_manager.run(filtered_data)
         except Exception as e:
             self._logger.error(
                 f"""Error occurred while

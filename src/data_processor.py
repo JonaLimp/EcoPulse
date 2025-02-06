@@ -9,7 +9,7 @@ class DataProcessor(ABC):
 
     def __init__(self, name="EcoPulse"):
         self.name = name
-        self.logger = setup_logger(self.name)
+        self._logger = setup_logger(self.name)
 
     @abstractmethod
     def run(self, data: Any = None) -> Any:

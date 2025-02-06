@@ -83,14 +83,16 @@ class RedditPostFetcher(RedditDataFetcher):
         Returns:
             list[dict[str, any]]: List of dictionaries containing post data.
         """
+        self._logger.info("Fetching Post data...")
         posts = []
         for category in self._categories:
             subreddits = self._categories[category]["subreddits"]
             for subreddit in subreddits:
-                self.logger.info(f"Searching in subreddit: {subreddit}")
                 keywords = self._categories[category]["keywords"]
                 for keyword in keywords:
-                    self.logger.info(f"Searching for keyword: {keyword}")
+                    self._logger.info(
+                        f"Searching in {subreddit} for keyword: {keyword}"
+                    )
                     try:
                         for submission in self._reddit.subreddit(subreddit).search(
                             keyword, sort="new", time_filter="day", limit=self._limit
@@ -115,6 +117,6 @@ class RedditPostFetcher(RedditDataFetcher):
                                 }
                             )
                     except Exception as e:
-                        self.logger.error(f"Error fetching posts: {e}")
+                        self._logger.error(f"Error fetching posts: {e}")
 
         return posts

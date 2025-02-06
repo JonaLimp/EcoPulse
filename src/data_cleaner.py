@@ -36,6 +36,7 @@ class RedditPostCleaner(RedditCleaner):
         Returns:
         - pd.DataFrame: A Pandas DataFrame containing the cleaned data.
         """
+        self._logger.info("Cleaning post data...")
         df = pd.DataFrame(data)
         df["title"] = df["title"].apply(self._clean_text)
         df.drop_duplicates(subset="id", inplace=True)
@@ -58,6 +59,7 @@ class RedditCommentCleaner(RedditCleaner):
         Returns:
         - pd.DataFrame: A Pandas DataFrame containing the cleaned data.
         """
+        self._logger.info("Cleaning comment data...")
         df = pd.DataFrame(data)
         df = df[df["body"].notna()]
         df = df[~df["body"].isin(["[deleted]", "[removed]"])]
