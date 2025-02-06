@@ -45,8 +45,17 @@ class RedditCommentFetcher(RedditDataFetcher):
         Returns:
             list[dict[str, any]]: List of dictionaries containing comment data.
         """
+        self._logger.info("Fetching Comment Data...")
         comments = []
-        for post_id in self._post_ids:
+        for index, post_id in enumerate(self._post_ids):
+            progress = (index + 1) / len(self._post_ids) * 100
+
+            if progress % 10 == 0 or index == 0:
+                self._logger.info(
+                    f"""Processing Comments {index + 1} /
+                    {len(self._post_ids)}. {progress:.0f}%"""
+                )
+
             post = self._reddit.submission(id=post_id)
             post.comments.replace_more(limit=0)
             for comment in post.comments.list():
