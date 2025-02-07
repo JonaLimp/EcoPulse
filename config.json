@@ -1,15 +1,16 @@
 {
-  "database": {
-    "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
-  },
-  "pipeline_settings": {
-    "categories": {
-      "General": {
-        "subreddits": ["environment"],
-        "keywords": ["climate change"]
-      }
+    "database": {
+      "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
     },
-    "post_limit": 10,
-    "log_file": "pipeline.log"
+    "pipeline_settings": {
+      "categories": {
+            "general_environment": {
+                "subreddits": ["environment", "sustainability", "EnvironmentalScience", "climatechange"],
+                "keywords": ["climate change", "global warming", "carbon footprint", "greenhouse gases", "pollution"]
+            }
+        },
+      "post_limit": 1,
+      "more_comments_limit": 1,
+      "log_file": "pipeline.log"
+    }
   }
-}
