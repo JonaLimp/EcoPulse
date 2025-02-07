@@ -64,6 +64,7 @@ class DataFilter(DataProcessor):
     def run(self, df: DataFrame) -> DataFrame:
         self._logger.info("Filtering data...")
         df = df[df.apply(lambda row: self._is_valuable(row), axis=1)]
+        self._logger.info(f"Remaining records: #{df.shape[0]}")
         return df
 
 

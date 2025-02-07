@@ -22,6 +22,15 @@ class RedditDataFetcher(DataProcessor):
             client_id=client_id, client_secret=client_secret, user_agent=user_agent
         )
 
+    @staticmethod
+    def _print_progress(index: int, previous_progress: int, length_data: int):
+        progress = int((index + 1) / length_data * 100)
+        if progress // 10 > previous_progress // 10:
+            previous_progress = progress
+            print(f"Progress: {progress}% ({index + 1}/{length_data})")
+
+        return previous_progress
+
 
 class RedditCommentFetcher(RedditDataFetcher):
     def __init__(
@@ -29,12 +38,12 @@ class RedditCommentFetcher(RedditDataFetcher):
         client_id,
         client_secret,
         user_agent,
-        more_comment_limit,
+        more_comments_limit,
         post_ids: list[str],
     ):
         super().__init__(client_id, client_secret, user_agent)
         self._post_ids = post_ids
-        self._more_comment_limit = more_comment_limit
+        self._more_comments_limit = more_comments_limit
 
     def run(self) -> list[dict[str]]:
         """
@@ -49,17 +58,15 @@ class RedditCommentFetcher(RedditDataFetcher):
         """
         self._logger.info("Fetching Comment Data...")
         comments = []
-        for index, post_id in enumerate(self._post_ids):
-            progress = (index + 1) / len(self._post_ids) * 100
+        previous_progress = -1
 
-            if progress % 10 == 0 or index == 0:
-                self._logger.info(
-                    f"""Processing Comments {index + 1} /
-                    {len(self._post_ids)}. {progress:.0f}%"""
-                )
+        for index, post_id in enumerate(self._post_ids):
+            previous_progress = self._print_progress(
+                index, previous_progress, len(self._post_ids)
+            )
 
             post = self._reddit.submission(id=post_id)
-            post.comments.replace_more(limit=self._more_comment_limit)
+            post.comments.replace_more(limit=self._more_comments_limit)
             for comment in post.comments.list():
                 comments.append(
                     {
@@ -72,6 +79,8 @@ class RedditCommentFetcher(RedditDataFetcher):
                         "created_utc": comment.created_utc,
                     }
                 )
+
+        self._logger.info(f"Fetched Data: #{len(comments)}")
         return comments
 
 
@@ -114,7 +123,7 @@ class RedditPostFetcher(RedditDataFetcher):
                         for submission in self._reddit.subreddit(subreddit).search(
                             keyword,
                             sort="new",
-                            time_filter="day",
+                            time_filter="month",
                             limit=self._post_limit,
                         ):
                             posts.append(
@@ -139,4 +148,5 @@ class RedditPostFetcher(RedditDataFetcher):
                     except Exception as e:
                         self._logger.error(f"Error fetching posts: {e}")
 
+        self._logger.info(f"Fetched Data: #{len(posts)}")
         return posts

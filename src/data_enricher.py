@@ -60,6 +60,7 @@ class RedditCommentEnricher(DataEnricher):
         Returns:
         - pd.DataFrame: A Pandas DataFrame with the enriched columns.
         """
+        self._logger.info("Enrich data...")
         data["created_datetime"] = data["created_utc"].apply(self._format_datetime)
         data["sentiment_score"] = data["body"].apply(self.get_sentiment_score)
         return data
