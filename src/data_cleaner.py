@@ -4,64 +4,114 @@ from .data_processor import DataProcessor
 
 
 class RedditCleaner(DataProcessor):
+    """Base class for cleaning Reddit data (posts & comments)."""
+
+    def __init__(self):
+        super().__init__()
+
     @staticmethod
     def _clean_text(text: str):
-        """Cleans Reddit comment text by removing unwanted elements."""
-        if not text or text.strip() == "":
-            return None
+        """
+        Cleans text by:
+        - Removing URLs, @mentions, and hashtags.
+        - Keeping only alphanumeric characters and basic punctuation.
+        - Removing extra spaces and converting to lowercase.
+        """
+        if not isinstance(text, str) or text.strip() == "":
+            return "Content unavailable"
 
-        text = text.lower()  # Convert to lowercase
+        text = text.lower().strip()
         text = re.sub(r"http\S+|www\S+", "", text)  # Remove URLs
         text = re.sub(r"@\w+", "", text)  # Remove @mentions
         text = re.sub(r"#\w+", "", text)  # Remove hashtags
-        text = re.sub(
-            r"[^a-zA-Z0-9\s.,!?]", "", text
-        )  # Remove special characters (except punctuation)
-        text = re.sub(r"\s+", " ", text).strip()  # Remove extra spaces and newlines
+        text = re.sub(r"[^a-zA-Z0-9\s.,!?]", "", text)  # Remove special characters
+        text = re.sub(r"\s+", " ", text).strip()  # Remove extra spaces
 
         return text
 
+    def run(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Cleans common fields across all Reddit data.
+
+        Args:
+        - data (pd.DataFrame): Raw Reddit data.
+
+        Returns:
+        - pd.DataFrame: Cleaned data.
+        """
+        self._logger.info("Cleaning data...")
+
+        data = data.copy()
+        data = data.fillna(
+            {
+                "author": "Anonymous",
+                "sentiment_score": 0,
+                "score": 0,
+                "created_utc": int(pd.Timestamp.now().timestamp()),
+            }
+        )
+
+        data.loc[:, "created_datetime"] = pd.to_datetime(data["created_utc"], unit="s")
+
+        return data
+
 
 class RedditPostCleaner(RedditCleaner):
+    """Cleans Reddit post data before database insertion."""
+
     def __init__(self):
         super().__init__()
 
-    def run(self, data: list[dict]) -> pd.DataFrame:
+    def run(self, data: pd.DataFrame) -> pd.DataFrame:
         """
-        Clean a list of raw data from Reddit.
+        Cleans Reddit posts by:
+        - Removing missing/deleted titles.
+        - Cleaning title text.
 
         Args:
-        - raw_data (list[dict]): A list of dictionaries containing raw data from Reddit.
+        - data (pd.DataFrame): Raw Reddit post data.
 
         Returns:
-        - pd.DataFrame: A Pandas DataFrame containing the cleaned data.
+        - pd.DataFrame: Cleaned post data.
         """
-        self._logger.info("Cleaning post data...")
-        df = pd.DataFrame(data)
-        df["title"] = df["title"].apply(self._clean_text)
-        df.drop_duplicates(subset="id", inplace=True)
-        df.dropna(subset=["title"], inplace=True)
-        df["created_datetime"] = pd.to_datetime(df["created_utc"], unit="s")
-        return df
+        data = super().run(data)
+
+        data = data[data["title"].notna()].copy()
+        data = data[~data["title"].isin(["[deleted]", "[removed]"])].copy()
+
+        data.loc[:, "title"] = data["title"].apply(self._clean_text)
+        data.loc[:, "title"] = data["title"].fillna("Content unavailable")
+
+        self._logger.info(f"Remaining records: {data.shape[0]}")
+        return data
 
 
 class RedditCommentCleaner(RedditCleaner):
+    """Cleans Reddit comment data before database insertion."""
+
     def __init__(self):
         super().__init__()
 
-    def run(self, data: list[dict]) -> pd.DataFrame:
+    def run(self, data: pd.DataFrame) -> pd.DataFrame:
         """
-        Clean a list of raw data from Reddit.
+        Cleans Reddit comments by:
+        - Removing missing/deleted comments.
+        - Cleaning comment text.
+        - Ensuring MySQL-safe data types.
 
         Args:
-        - raw_data (list[dict]): A list of dictionaries containing raw data from Reddit.
+        - data (pd.DataFrame): Raw Reddit comment data.
 
         Returns:
-        - pd.DataFrame: A Pandas DataFrame containing the cleaned data.
+        - pd.DataFrame: Cleaned comment data.
         """
-        self._logger.info("Cleaning comment data...")
-        df = pd.DataFrame(data)
-        df = df[df["body"].notna()]
-        df = df[~df["body"].isin(["[deleted]", "[removed]"])]
-        df["body"] = df["body"].apply(self._clean_text)
-        return df
+        data = super().run(data)
+
+        data = data[data["body"].notna()].copy()
+        data = data[~data["body"].isin(["[deleted]", "[removed]"])].copy()
+
+        data.loc[:, "body"] = data["body"].apply(self._clean_text)
+        data.loc[:, "body"] = data["body"].fillna("Content unavailable")
+
+        self._logger.info(f"Remaining records: {data.shape[0]}")
+        return data
