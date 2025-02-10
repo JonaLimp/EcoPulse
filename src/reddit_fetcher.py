@@ -111,14 +111,15 @@ class RedditPostFetcher(RedditDataFetcher):
         """
         self._logger.info("Fetching Post data...")
         posts = []
-        for category in self._categories:
+        previous_progress = -1
+
+        for index, category in enumerate(self._categories):
             subreddits = self._categories[category]["subreddits"]
             for subreddit in subreddits:
                 keywords = self._categories[category]["keywords"]
+                self._logger.info(f"Searching in {subreddit} for keywords: {keywords}")
+
                 for keyword in keywords:
-                    self._logger.info(
-                        f"Searching in {subreddit} for keyword: {keyword}"
-                    )
                     try:
                         for submission in self._reddit.subreddit(subreddit).search(
                             keyword,
@@ -146,7 +147,13 @@ class RedditPostFetcher(RedditDataFetcher):
                                 }
                             )
                     except Exception as e:
-                        self._logger.error(f"Error fetching posts: {e}")
+                        self._logger.error(
+                            f"Error fetching {keyword} in subreddtit: {subreddit}: {e}"
+                        )
+
+            previous_progress = self._print_progress(
+                index, previous_progress, len(self._categories)
+            )
 
         self._logger.info(f"Fetched Data: #{len(posts)}")
         return posts
