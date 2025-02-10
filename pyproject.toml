@@ -40,11 +40,7 @@ pre-commit = "^4.1.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 88
-target-version = ['py310']
-
 [tool.ruff]
-line-length = 120
+line-length = 88
 select = ["E", "F", "W"]
 ignore = ["E501"]
