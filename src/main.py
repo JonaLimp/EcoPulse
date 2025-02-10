@@ -31,6 +31,7 @@ DB_URL = f"""mysql+mysqlconnector://
 CATEGORIES = config["pipeline_settings"]["categories"]
 POST_LIMIT = config["pipeline_settings"]["post_limit"]
 MORE_COMMENTS_LIMIT = config["pipeline_settings"]["more_comments_limit"]
+TIME_FILTER = config["pipeline_settings"]["time_filter"]
 
 
 def main():
@@ -40,6 +41,7 @@ def main():
         REDDIT_USER_AGENT,
         CATEGORIES,
         POST_LIMIT,
+        TIME_FILTER,
     )
 
     post_cleaner = RedditPostCleaner()

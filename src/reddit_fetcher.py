@@ -90,12 +90,14 @@ class RedditPostFetcher(RedditDataFetcher):
         client_id: str,
         client_secret: str,
         user_agent: str,
-        categories,
-        post_limit,
+        categories: dict[str, list[str]],
+        post_limit: int,
+        time_filter: str,
     ):
         super().__init__(client_id, client_secret, user_agent)
         self._categories = categories
         self._post_limit = post_limit
+        self._time_filter = time_filter
 
     def run(self) -> Any:
         """
@@ -124,7 +126,7 @@ class RedditPostFetcher(RedditDataFetcher):
                         for submission in self._reddit.subreddit(subreddit).search(
                             keyword,
                             sort="new",
-                            time_filter="month",
+                            time_filter=self._time_filter,
                             limit=self._post_limit,
                         ):
                             posts.append(

@@ -11,6 +11,7 @@
         },
       "post_limit": 1,
       "more_comments_limit": 1,
+      "time_filter": "month",
       "log_file": "pipeline.log"
     }
   }
