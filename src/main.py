@@ -25,7 +25,8 @@ with open("config.json") as config_file:
     config = json.load(config_file)
 
 DB_URL = config["database"]["url"]
-DB_URL = f"""mysql+mysqlconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"""
+DB_URL = f"""mysql+mysqlconnector://
+{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"""
 
 CATEGORIES = config["pipeline_settings"]["categories"]
 POST_LIMIT = config["pipeline_settings"]["post_limit"]
