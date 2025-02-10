@@ -17,6 +17,7 @@ class TestRedditPostFetcher(unittest.TestCase):
             "user_agent",
             {"category1": {"subreddits": ["subreddit1"], "keywords": ["keyword1"]}},
             10,
+            "month",
         )
 
     def test_fetch_reddit_posts_valid_input(self):
