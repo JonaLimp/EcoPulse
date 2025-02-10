@@ -30,10 +30,10 @@ jobs:
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH  # ✅ Ensure Poetry is in the PATH
 
       - name: Install dependencies
-        run: poetry install  # ✅ Install all dependencies
+        run: poetry install
 
       - name: Lint with ruff
-        run: poetry run ruff check .  # ✅ Uses Poetry to run ruff
+        run: poetry run ruff check .
 
       - name: Run unit tests with unittest
         run: poetry run python -m unittest discover -s tests -p "*.py"
