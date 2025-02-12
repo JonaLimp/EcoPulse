@@ -125,7 +125,7 @@ class RedditPostFetcher(RedditDataFetcher):
                     try:
                         for submission in self._reddit.subreddit(subreddit).search(
                             keyword,
-                            sort="new",
+                            sort=self._sort_filter,
                             time_filter=self._time_filter,
                             limit=self._post_limit,
                         ):

@@ -32,6 +32,7 @@ CATEGORIES = config["pipeline_settings"]["categories"]
 POST_LIMIT = config["pipeline_settings"]["post_limit"]
 MORE_COMMENTS_LIMIT = config["pipeline_settings"]["more_comments_limit"]
 TIME_FILTER = config["pipeline_settings"]["time_filter"]
+SORT_FILTER = config["pipeline_settings"]["sort_filter"]
 
 
 def main():
@@ -42,6 +43,7 @@ def main():
         CATEGORIES,
         POST_LIMIT,
         TIME_FILTER,
+        SORT_FILTER,
     )
 
     post_cleaner = RedditPostCleaner()
