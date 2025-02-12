@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
 from .logger import setup_logger
 
@@ -12,6 +12,6 @@ class DataProcessor(ABC):
         self._logger = setup_logger(self.name)
 
     @abstractmethod
-    def run(self, data: Any = None) -> Any:
+    def run(self, data: Optional[Any] = None) -> Any:
         """Abstract method to be implemented by subclasses."""
         pass
