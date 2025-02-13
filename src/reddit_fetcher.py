@@ -24,6 +24,17 @@ class RedditDataFetcher(DataProcessor):
 
     @staticmethod
     def _print_progress(index: int, previous_progress: int, length_data: int):
+        """
+        Prints the progress of fetching data as a percentage.
+
+        Args:
+        - index (int): Current index of the data being fetched.
+        - previous_progress (int): The previous progress (in 10% increments).
+        - length_data (int): The total length of the data being fetched.
+
+        Returns:
+        - int: The new previous progress (in 10% increments).
+        """
         progress = int((index + 1) / length_data * 100)
         if progress // 10 > previous_progress // 10:
             previous_progress = progress
@@ -41,11 +52,24 @@ class RedditCommentFetcher(RedditDataFetcher):
         more_comments_limit,
         post_ids: list[str],
     ):
+        """
+        Initializes the CommentFetcher object.
+
+        Parameters:
+        - client_id (str): Reddit API client ID
+        - client_secret (str): Reddit API client secret
+        - user_agent (str): Reddit API user agent string
+        - more_comments_limit (int): The limit for fetching more comments.
+        - post_ids (list[str]): List of post IDs.
+
+        Returns:
+        - None
+        """
         super().__init__(client_id, client_secret, user_agent)
         self._post_ids = post_ids
         self._more_comments_limit = more_comments_limit
 
-    def run(self) -> list[dict[str]]:
+    def run(self) -> list[dict[str, Any]]:
         """
         Fetches comments for a list of Reddit posts.
 
@@ -54,7 +78,7 @@ class RedditCommentFetcher(RedditDataFetcher):
             limit (int): Number of comments to fetch per post.
 
         Returns:
-            list[dict[str, any]]: List of dictionaries containing comment data.
+            list[dict[str, Any]]: List of dictionaries containing comment data.
         """
         self._logger.info("Fetching Comment Data...")
         comments = []
@@ -72,7 +96,7 @@ class RedditCommentFetcher(RedditDataFetcher):
                     {
                         "id": comment.id,
                         "post_id": post_id,
-                        "author": comment.author.name if comment.author else None,
+                        "author": getattr(comment.author, "name", None),
                         "subreddit": post.subreddit.display_name,
                         "body": comment.body,
                         "score": comment.score,
@@ -93,13 +117,15 @@ class RedditPostFetcher(RedditDataFetcher):
         categories: dict[str, list[str]],
         post_limit: int,
         time_filter: str,
+        sort_filter: str,
     ):
         super().__init__(client_id, client_secret, user_agent)
         self._categories = categories
         self._post_limit = post_limit
         self._time_filter = time_filter
+        self._sort_filter = sort_filter
 
-    def run(self) -> Any:
+    def run(self) -> list[dict[str, Any]]:
         """
         Fetches Reddit posts based on keywords.
 
