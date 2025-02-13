@@ -51,9 +51,9 @@ class PipelineManager:
             None
         """
         raw_data = DataFrame(self._fetcher.run())
-        enriched_data = self._enricher.run(raw_data)
+        cleaned_data = self._cleaner.run(raw_data)
+        enriched_data = self._enricher.run(cleaned_data)
         filtered_data = self._filter.run(enriched_data)
-        cleaned_data = self._cleaner.run(filtered_data)
 
         try:
             self._db_manager.run(cleaned_data)
