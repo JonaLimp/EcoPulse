@@ -21,7 +21,7 @@ class DataEnricher(DataProcessor):
         """
         return datetime.utcfromtimestamp(utc_timestamp).strftime("%Y-%m-%d %H:%M:%S")
 
-    def get_sentiment_score(self, text: str) -> float | None:
+    def _get_sentiment_score(self, text: str) -> float | None:
         """
         Calculates the sentiment score for a given text string.
 
@@ -63,7 +63,7 @@ class RedditCommentEnricher(DataEnricher):
         self._logger.info("Enrich data...")
         data["created_datetime"] = data["created_utc"].apply(self._format_datetime)
 
-        data["sentiment_score"] = data["body"].apply(self.get_sentiment_score)
+        data["sentiment_score"] = data["body"].apply(self._get_sentiment_score)
         data["sentiment_score"] = data["sentiment_score"].fillna(0).astype(float)
 
         return data
@@ -90,5 +90,5 @@ class RedditPostEnricher(DataEnricher):
         - pd.DataFrame: A Pandas DataFrame with the enriched columns.
         """
         data["created_datetime"] = data["created_utc"].apply(self._format_datetime)
-        data["sentiment_score"] = data["title"].apply(self.get_sentiment_score)
+        data["sentiment_score"] = data["title"].apply(self._get_sentiment_score)
         return data

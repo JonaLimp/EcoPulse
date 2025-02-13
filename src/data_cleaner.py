@@ -45,13 +45,10 @@ class RedditCleaner(DataProcessor):
         data = data.fillna(
             {
                 "author": "Anonymous",
-                "sentiment_score": 0,
                 "score": 0,
                 "created_utc": int(pd.Timestamp.now().timestamp()),
             }
         )
-
-        data.loc[:, "created_datetime"] = pd.to_datetime(data["created_utc"], unit="s")
 
         return data
 
