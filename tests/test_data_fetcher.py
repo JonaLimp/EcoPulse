@@ -18,6 +18,7 @@ class TestRedditPostFetcher(unittest.TestCase):
             {"category1": {"subreddits": ["subreddit1"], "keywords": ["keyword1"]}},
             10,
             "month",
+            "sort_filter",
         )
 
     def test_fetch_reddit_posts_valid_input(self):
