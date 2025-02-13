@@ -3,7 +3,7 @@ from .logger import setup_logger
 from .data_cleaner import RedditCleaner
 from .data_enricher import DataEnricher
 from .data_filter import DataFilter
-from .reddit_fetcher import RedditDataFetcher
+from .data_fetcher import RedditDataFetcher
 from .database_manager import DatabaseManager
 
 

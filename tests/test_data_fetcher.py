@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from src.reddit_fetcher import RedditCommentFetcher, RedditPostFetcher
+from src.data_fetcher import RedditCommentFetcher, RedditPostFetcher
 
 
 class TestRedditPostFetcher(unittest.TestCase):
     """Test class for RedditFetcher"""
 
-    @patch("src.reddit_fetcher.praw.Reddit")
+    @patch("src.data_fetcher.praw.Reddit")
     def setUp(self, mock_praw):
         """Set up a RedditFetcher instance with a fully mocked Reddit API."""
         self.mock_reddit = mock_praw.return_value
@@ -46,7 +46,7 @@ class TestRedditPostFetcher(unittest.TestCase):
 class TestRedditCommentFetcher(unittest.TestCase):
     """Test class for RedditFetcher"""
 
-    @patch("src.reddit_fetcher.praw.Reddit")
+    @patch("src.data_fetcher.praw.Reddit")
     def setUp(self, mock_praw):
         """Set up a RedditFetcher instance with a fully mocked Reddit API."""
         self.mock_reddit = mock_praw.return_value

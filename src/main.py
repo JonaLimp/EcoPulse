@@ -3,7 +3,7 @@ import json
 
 from dotenv import load_dotenv
 
-from .reddit_fetcher import RedditPostFetcher, RedditCommentFetcher
+from .data_fetcher import RedditPostFetcher, RedditCommentFetcher
 from .database_manager import CommentDataBaseManager, PostDataBaseManager
 from .pipeline_manager import PipelineManager
 from .data_cleaner import RedditPostCleaner, RedditCommentCleaner
