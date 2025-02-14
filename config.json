@@ -2,16 +2,65 @@
     "database": {
       "url": "mysql+mysqlconnector://username:password@localhost/reddit_data"
     },
-    "pipeline_settings": {
-      "categories": {
+    "fetcher_settings": {
+            "post_limit": 1,
+            "more_comments_limit": 1,
+            "time_filter": "month",
+            "log_file": "pipeline.log",
+            "sort_filter": "new"
+            },
+    "filter_settings": {
+            "min_upvotes": 10,
+            "min_comments": 5,
+            "min_words": 20,
+            "sentiment_threshold": 0.3
+
+          },
+  "categories": {
             "general_environment": {
                 "subreddits": ["environment", "sustainability", "EnvironmentalScience", "climatechange"],
                 "keywords": ["climate change", "global warming", "carbon footprint", "greenhouse gases", "pollution"]
+            },
+            "renewable_energy": {
+                "subreddits": ["renewableenergy", "SolarPower", "Energy", "GreenTechnology"],
+                "keywords": ["solar energy", "wind power", "renewable energy", "battery storage", "hydropower", "net zero"]
+            },
+            "climate_activism": {
+                "subreddits": ["climateactionplan", "FridaysForFuture", "EcoActivism"],
+                "keywords": ["climate activism", "protest", "fossil fuel divestment", "carbon tax", "environmental justice"]
+            },
+            "waste_management": {
+                "subreddits": ["recycling", "zero_waste", "Permaculture"],
+                "keywords": ["plastic waste", "composting", "circular economy", "minimalist lifestyle", "biodegradable"]
+            },
+            "capital_cities": {
+                "subreddits": [
+                    "Berlin", "London", "Paris", "NewYorkCity", "Tokyo", "Sydney",
+                    "Delhi", "Beijing", "MexicoCity", "Jakarta", "Moscow", "Cairo",
+                    "Nairobi", "Bangkok", "BuenosAires", "CapeTown", "Lagos", "Dubai", "Istanbul"
+                ],
+                "keywords": [
+                    "air pollution", "urban sustainability", "climate resilience",
+                    "coastal erosion", "waste management",
+                    "green infrastructure", "heat waves", "carbon footprint",
+                    "climate adaptation", "clean energy transition"
+                ]
+            },
+            "countries": {
+                "subreddits": [
+                    "Germany", "UnitedKingdom", "France", "UnitedStates", "Japan", "Australia",
+                    "India", "China", "Mexico", "Indonesia", "Russia", "Egypt",
+                    "Kenya", "Thailand", "Argentina", "SouthAfrica", "Nigeria", "UAE", "Turkey"
+                ],
+                "keywords": [
+                    "climate policy", "carbon neutrality", "renewable energy investment",
+                    "deforestation", "climate finance", "national emissions targets",
+                    "fossil fuel subsidies", "biodiversity protection", "recycling laws"
+                ]
+            },
+            "science_and_research": {
+                "subreddits": ["science", "EarthScience", "Futurology"],
+                "keywords": ["climate modeling", "IPCC report", "geoengineering", "biodiversity loss"]
             }
-        },
-      "post_limit": 1,
-      "more_comments_limit": 1,
-      "time_filter": "month",
-      "log_file": "pipeline.log"
-    }
-  }
+        }
+}

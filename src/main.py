@@ -21,18 +21,23 @@ DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 
-with open("config.json") as config_file:
+with open("_config.json") as config_file:
     config = json.load(config_file)
 
 DB_URL = config["database"]["url"]
 DB_URL = f"""mysql+mysqlconnector://
 {DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{DATABASE_NAME}"""
 
-CATEGORIES = config["pipeline_settings"]["categories"]
-POST_LIMIT = config["pipeline_settings"]["post_limit"]
-MORE_COMMENTS_LIMIT = config["pipeline_settings"]["more_comments_limit"]
-TIME_FILTER = config["pipeline_settings"]["time_filter"]
-SORT_FILTER = config["pipeline_settings"]["sort_filter"]
+CATEGORIES = config["categories"]
+POST_LIMIT = config["fetcher_settings"]["post_limit"]
+MORE_COMMENTS_LIMIT = config["fetcher_settings"]["more_comments_limit"]
+TIME_FILTER = config["fetcher_settings"]["time_filter"]
+SORT_FILTER = config["fetcher_settings"]["sort_filter"]
+
+MIN_UPVOTES = config["filter_settings"]["min_upvotes"]
+MIN_COMMENTS = config["filter_settings"]["min_comments"]
+MIN_WORDS = config["filter_settings"]["min_words"]
+SENTIMENT_THRESHOLD = config["filter_settings"]["sentiment_threshold"]
 
 
 def main():
@@ -48,7 +53,12 @@ def main():
 
     post_cleaner = RedditPostCleaner()
     post_enricher = RedditPostEnricher()
-    post_filter = RedditPostFilter()
+    post_filter = RedditPostFilter(
+        min_upvotes=MIN_UPVOTES,
+        min_comments=MIN_COMMENTS,
+        min_words=MIN_WORDS,
+        sentiment_threshold=SENTIMENT_THRESHOLD,
+    )
     post_db_manager = PostDataBaseManager(
         DB_URL, DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
     )
