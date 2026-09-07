@@ -58,10 +58,8 @@ class PipelineManager:
         try:
             self._db_manager.run(cleaned_data)
         except Exception as e:
-            self._logger.error(
-                f"""Error occurred while
-                               storing post data: {str(e)}"""
-            )
+            self._logger.error(f"""Error occurred while
+                               storing post data: {str(e)}""")
 
         self._logger.info("Pipeline executed!")
         return filtered_data
